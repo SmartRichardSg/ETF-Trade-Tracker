@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF Trade Tracker</title>
+<style>
+:root{--blue:#1769e0;--bg:#f4f7fb;--text:#172033;--muted:#687386;--line:#dce3ed;--green:#16834b;--red:#d93636}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(135deg,var(--blue),#3b82f6);color:#fff;padding:16px;position:sticky;top:0;z-index:5}
+.head{display:flex;justify-content:space-between;align-items:center}.brand{display:flex;gap:10px;align-items:center}.icon{font-size:30px}.title{font-size:21px;font-weight:800}.sub{font-size:11px;opacity:.82}
+.lock{background:#fff2;color:#fff;border:1px solid #fff5;border-radius:9px;padding:8px}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}nav button{border:0;border-radius:9px;padding:9px 3px;background:#fff2;color:#fff;font-weight:800;font-size:11px}nav button.active{background:#fff;color:var(--blue)}
+main{max-width:950px;margin:auto;padding:14px}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px;margin-bottom:13px;box-shadow:0 4px 16px #17345b0d}
+h2{font-size:18px;margin:0 0 12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.etfs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.etf{border:1px solid var(--line);border-radius:13px;padding:14px}.etf b{font-size:19px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}
+button,.btn{cursor:pointer;font:inherit;font-weight:800;border-radius:10px;padding:11px;border:0}.blue{background:var(--blue);color:#fff}.green{background:#1ba45d;color:#fff}.red{background:#dd3939;color:#fff}.light{background:#edf3fa;color:#23405f}.outline{background:#fff;border:1px solid var(--line)}
+label{display:block;font-size:12px;font-weight:800;margin:9px 0 5px}input,select,textarea{width:100%;padding:10px;border:1px solid #ccd5e2;border-radius:9px;font:inherit}textarea{min-height:65px}
+.notice{background:#eff6ff;border:1px solid #d7e6ff;border-radius:10px;padding:10px;font-size:12px;color:#31527b;margin-top:10px}.preview{background:#fff7ef;border:1px solid #ffd9bd;border-radius:10px;padding:11px;font-size:12px;margin:10px 0}.bad{background:#fff0f0;border-color:#ffd0d0}
+.cost{background:#f7f9fc;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px}.cost div{display:flex;justify-content:space-between;padding:3px 0;font-size:12px}.cost .total{border-top:1px solid var(--line);margin-top:5px;padding-top:7px;font-weight:900}
+.list{display:grid;gap:9px}.item{border:1px solid var(--line);border-radius:11px;padding:11px}.top{display:flex;justify-content:space-between;gap:8px}.meta{font-size:11px;color:var(--muted);margin-top:3px}.minis{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}.mini{background:#f7f9fc;border-radius:8px;padding:7px}.mini small{display:block;color:var(--muted);font-size:9px}.mini b{font-size:12px}
+.actions{display:flex;gap:6px;margin-top:8px}.smallbtn{padding:7px 9px;font-size:11px}.pill{font-size:10px;font-weight:800;border-radius:99px;padding:3px 7px;background:#edf3fa}.buy{background:#e5f7ed;color:var(--green)}.sell{background:#fde9e9;color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.stat{background:#f7faff;border:1px solid #dbe8fb;border-radius:11px;padding:10px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:19px;margin-top:3px}.positive{color:var(--green)}.negative{color:var(--red)}
+.scroll{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px;font-size:11px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:22px;font-size:12px}
+.login{position:fixed;inset:0;z-index:20;background:#edf5ff;display:flex;align-items:center;justify-content:center;padding:18px}.loginbox{width:min(390px,100%);background:#fff;border-radius:22px;padding:25px;text-align:center;box-shadow:0 15px 45px #17345b22}.loginicon{font-size:54px}.error{height:18px;color:var(--red);font-size:11px;margin-top:6px}.hidden{display:none!important}
+@media(max-width:700px){.grid2,.etfs{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.minis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div id="login" class="login hidden">
+  <div class="loginbox">
+    <div class="loginicon">📈</div>
+    <h1 id="loginTitle">ETF Trade Tracker</h1>
+    <p class="sub" style="color:#687386">Enter your password to access your records.</p>
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="btn blue" style="width:100%;margin-top:10px" onclick="unlock()">Unlock</button>
+    <div id="loginError" class="error"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+<header>
+  <div class="head">
+    <div class="brand"><span class="icon" id="appIcon">📈</span><div><div class="title" id="appTitle">ETF Trade Tracker</div><div class="sub">ES3 • G3B • LIFO</div></div></div>
+    <button class="lock" onclick="lockApp()">🔒 Lock</button>
+  </div>
+  <nav>
+    <button class="active" data-tab="trade" onclick="showTab('trade')">💰 Trade</button>
+    <button data-tab="lots" onclick="showTab('lots')">📦 Lots</button>
+    <button data-tab="review" onclick="showTab('review')">📊 Review</button>
+    <button data-tab="settings" onclick="showTab('settings')">⚙️ Settings</button>
+  </nav>
+</header>
+
+<main>
+<section id="trade">
+<div class="card">
+<h2>Today's Trading</h2>
+<div class="etfs">
+  <div class="etf"><b>ES3</b><div class="sub" style="color:#687386">Straits Times ETF</div><div class="buttons"><button class="btn green" onclick="openForm('BUY','ES3')">＋ Buy</button><button class="btn red" onclick="openForm('SELL','ES3')">− Sell</button></div></div>
+  <div class="etf"><b>G3B</b><div class="sub" style="color:#687386">Singapore STI ETF</div><div class="buttons"><button class="btn green" onclick="openForm('BUY','G3B')">＋ Buy</button><button class="btn red" onclick="openForm('SELL','G3B')">− Sell</button></div></div>
+</div>
+<div class="notice">This tracker records <b>new transactions only</b>. Existing holdings are not included.</div>
+</div>
+
+<div id="tradeForm" class="card hidden">
+<h2 id="formTitle">New Trade</h2>
+<div class="grid2">
+<div><label>ETF</label><select id="etf" onchange="refreshPreview()"><option>ES3</option><option>G3B</option></select></div>
+<div><label>Transaction</label><select id="type" onchange="refreshPreview()"><option>BUY</option><option>SELL</option></select></div>
+</div>
+<div id="sellPreview" class="preview hidden"></div>
+<div class="grid2">
+<div><label id="priceLabel">Buy Price (SGD)</label><input id="price" type="number" min="0" step="0.0001"></div>
+<div><label>Filled Quantity (shares)</label><input id="qty" type="number" min="1" step="1" oninput="refreshPreview()"></div>
+</div>
+<label>Actual total fees (optional)</label>
+<input id="actualFees" type="number" min="0" step="0.01" placeholder="Blank = use Settings estimate">
+<label>Note (optional)</label><textarea id="note"></textarea>
+<div id="costPreview"></div>
+<div class="grid2" style="margin-top:11px"><button class="btn light" onclick="cancelForm()">Cancel</button><button id="saveButton" class="btn blue" onclick="saveTrade()">Save Trade</button></div>
+</div>
+
+<div class="card"><h2>Recent Transactions</h2><div id="recent" class="list"></div></div>
+</section>
+
+<section id="lots" class="hidden">
+<div class="card"><h2>📦 Open Lots</h2><div class="notice">The newest open lot is used first when you sell (LIFO). Partial lots remain open.</div><div id="openLots"></div></div>
+<div class="card"><h2>✅ Completed Lot Results</h2><div id="completedLots"></div></div>
+</section>
+
+<section id="review" class="hidden">
+<div class="card"><h2>📊 Performance Review</h2><div id="stats" class="stats"></div></div>
+<div class="card"><h2>ES3 vs G3B</h2><div id="summary"></div></div>
+<div class="card"><h2>Monthly Realised P/L</h2><div class="grid2"><div><b>ES3</b><div id="es3Chart"></div></div><div><b>G3B</b><div id="g3bChart"></div></div></div></div>
+<div class="card"><h2>Completed Trades</h2><div id="completedTable"></div></div>
+</section>
+
+<section id="settings" class="hidden">
+<div class="card"><h2>⚙️ App Settings</h2><div class="grid2"><div><label>App Title</label><input id="setTitle"></div><div><label>Icon</label><input id="setIcon"></div><div><label>Main colour</label><input id="setPrimary" type="color"></div><div><label>Background colour</label><input id="setBg" type="color"></div></div><label>Version</label><input id="setVersion"><button class="btn blue" style="margin-top:10px" onclick="saveAppSettings()">Save App Settings</button></div>
+
+<div class="card"><h2>💰 Transaction Costs</h2><div class="notice">Configure these estimates for your broker. You can enter the exact total fee on each trade when available.</div><div class="grid2">
+<div><label>Brokerage %</label><input id="brokerPct" type="number" step="0.0001"></div><div><label>Brokerage minimum</label><input id="brokerMin" type="number" step="0.01"></div>
+<div><label>Clearing fee %</label><input id="clearingPct" type="number" step="0.0001"></div><div><label>SGX trading/access %</label><input id="tradingPct" type="number" step="0.0001"></div>
+<div><label>GST %</label><input id="gstPct" type="number" step="0.1"></div><div><label>Other fee / transaction</label><input id="otherFee" type="number" step="0.01"></div>
+</div><label><input id="gstOn" type="checkbox" style="width:auto"> Apply GST to calculated fees</label><button class="btn blue" onclick="saveCostSettings()">Save Cost Settings</button></div>
+
+<div class="card"><h2>🔐 App Security</h2><div class="notice">Password protection is an app-level privacy lock on this device.</div><label><input id="passwordEnabled" type="checkbox" style="width:auto" onchange="passwordToggle()"> Enable password protection</label><div id="passwordBox" class="hidden"><label>New password</label><input id="newPassword" type="password"><label>Confirm password</label><input id="confirmPassword" type="password"><button class="btn blue" style="margin-top:10px" onclick="setPassword()">Set / Change Password</button></div><button class="btn light" style="margin-top:10px" onclick="lockApp()">🔒 Lock App Now</button></div>
+
+<div class="card"><h2>💾 Backup & Restore</h2><div class="grid2"><button class="btn light" onclick="exportBackup()">⬇️ Export Backup</button><button class="btn light" onclick="document.getElementById('backupFile').click()">⬆️ Import Backup</button></div><input id="backupFile" class="hidden" type="file" accept=".json" onchange="importBackup(event)"></div>
+<div class="card"><h2>⚠️ Data Management</h2><button class="btn outline" onclick="clearAll()">Delete All Trade Records</button></div>
+</section>
+</main>
+<div style="text-align:center;color:#687386;font-size:10px;padding:12px" id="footer"></div>
+</div>
+
+<script>
+const KEY="ETF_TRACKER_V1";
+const DEFAULT={
+ settings:{title:"ETF Trade Tracker",icon:"📈",primary:"#1769e0",bg:"#f4f7fb",version:"1.0",brokerPct:0,brokerMin:0,clearingPct:0.0325,tradingPct:0.0075,gstPct:9,otherFee:0,gstOn:true,passwordEnabled:false,passwordHash:""},
+ transactions:[]
+};
+let state,editingId=null;
+const $=id=>document.getElementById(id), n=x=>Number(x||0), money=x=>"S$"+n(x).toFixed(2), round=x=>Math.round((x+Number.EPSILON)*100)/100;
+function load(){try{state=JSON.parse(localStorage.getItem(KEY))||structuredClone(DEFAULT)}catch{state=structuredClone(DEFAULT)}state.settings={...DEFAULT.settings,...state.settings};state.transactions=state.transactions||[]}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function dt(x){return new Date(x).toLocaleString("en-SG",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function esc(x){return String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+async function sha(x){let b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(x));return [...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,"0")).join("")}
+function applyTheme(){document.documentElement.style.setProperty("--blue",state.settings.primary);document.documentElement.style.setProperty("--bg",state.settings.bg);$("appTitle").textContent=state.settings.title;$("appIcon").textContent=state.settings.icon;$("loginTitle").textContent=state.settings.title;$("footer").textContent=state.settings.title+" • New transactions only • LIFO • v"+state.settings.version}
+function fee(gross,actual=null){if(actual!==null&&actual!=="")return{total:round(actual),actual:true};let s=state.settings,b=Math.max(gross*s.brokerPct/100,gross?s.brokerMin:0),c=gross*s.clearingPct/100,t=gross*s.tradingPct/100,o=s.otherFee,g=s.gstOn?(b+c+t+o)*s.gstPct/100:0;return{total:round(b+c+t+o+g),actual:false}}
+function rebuild(){
+ let lots=[],matches=[],saleInfo={};
+ let tx=[...state.transactions].sort((a,b)=>new Date(a.time)-new Date(b.time)||a.id.localeCompare(b.id));
+ for(let x of tx){
+  if(x.type==="BUY"){lots.push({id:x.id,etf:x.etf,tx:x,original:x.qty,remaining:x.qty,buyFees:fee(x.price*x.qty,x.actualFees).total});continue}
+  let open=lots.filter(l=>l.etf===x.etf&&l.remaining>0).sort((a,b)=>new Date(b.tx.time)-new Date(a.tx.time)||b.id.localeCompare(a.id));
+  let available=open.reduce((s,l)=>s+l.remaining,0);if(x.qty>available)throw Error("SELL "+x.etf+" requests "+x.qty+" shares, but only "+available+" are available.");
+  let sellFees=fee(x.price*x.qty,x.actualFees).total,left=x.qty,totalPL=0;
+  for(let l of open){if(!left)break;let q=Math.min(left,l.remaining),bf=l.buyFees*q/l.original,sf=sellFees*q/x.qty,bg=l.tx.price*q,sg=x.price*q,pl=round((sg-sf)-(bg+bf));matches.push({saleId:x.id,lotId:l.id,etf:x.etf,sellDate:x.time,buyDate:l.tx.time,qty:q,buyPrice:l.tx.price,sellPrice:x.price,buyFees:round(bf),sellFees:round(sf),pl});l.remaining-=q;l.buyFees-=bf;left-=q;totalPL+=pl}
+  saleInfo[x.id]=round(totalPL)
+ }
+ return{lots,matches,saleInfo}
+}
+function showTab(id){document.querySelectorAll("main>section").forEach(s=>s.classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));render()}
+function openForm(type,etf){editingId=null;$("tradeForm").classList.remove("hidden");$("type").value=type;$("etf").value=etf;$("price").value="";$("qty").value="";$("actualFees").value="";$("note").value="";$("formTitle").textContent="New "+(type==="BUY"?"Buy":"Sell")+" Transaction";$("saveButton").textContent="Save "+type;refreshPreview();$("tradeForm").scrollIntoView({behavior:"smooth"})}
+function cancelForm(){editingId=null;$("tradeForm").classList.add("hidden")}
+function refreshPreview(){
+ let type=$("type").value,etf=$("etf").value,p=n($("price").value),q=n($("qty").value);
+ $("priceLabel").textContent=(type==="BUY"?"Buy":"Sell")+" Price (SGD)";
+ if(type==="SELL"){let b=rebuild(),open=b.lots.filter(l=>l.etf===etf&&l.remaining>0),available=open.reduce((s,l)=>s+l.remaining,0);$("sellPreview").classList.remove("hidden");$("sellPreview").className="preview "+(open.length?"":"bad");$("sellPreview").innerHTML=open.length?`<b>Next LIFO lot</b><br>Buy ${dt(open[0].tx.time)} • ${open[0].remaining} shares @ ${money(open[0].tx.price)}<br>Available: ${available} shares`:`<b>No open ${etf} lot.</b>`}else $("sellPreview").classList.add("hidden");
+ if(p>0&&q>0){let f=fee(p*q,$("actualFees").value);$("costPreview").innerHTML=`<div class="cost"><div><span>Gross ${type==="BUY"?"purchase":"sale"}</span><b>${money(p*q)}</b></div><div><span>${type==="BUY"?"Buying":"Selling"} costs</span><b>${money(f.total)}</b></div><div class="total"><span>${type==="BUY"?"Total buying cost":"Net sale proceeds"}</span><b>${money(type==="BUY"?p*q+f.total:p*q-f.total)}</b></div></div>`}else $("costPreview").innerHTML=""
+}
+$("price").addEventListener("input",refreshPreview);$("qty").addEventListener("input",refreshPreview);$("actualFees").addEventListener("input",refreshPreview);
+function saveTrade(){
+ let type=$("type").value,etf=$("etf").value,p=n($("price").value),q=n($("qty").value),af=$("actualFees").value;
+ if(p<=0||q<=0)return alert("Enter a valid price and filled quantity.");
+ let old=editingId?state.transactions.find(x=>x.id===editingId):null;
+ let x={id:editingId||Date.now().toString(36)+Math.random().toString(36).slice(2),type,etf,price:p,qty:q,actualFees:af===""?null:n(af),note:$("note").value.trim(),time:old?old.time:new Date().toISOString()};
+ if(old)Object.assign(old,x);else state.transactions.push(x);
+ try{let b=rebuild();save();cancelForm();render();alert(type==="SELL"?"Sale completed.\n\nRealised net P/L: "+money(b.saleInfo[x.id]||0):"Buy saved as a new lot.")}catch(e){if(old){Object.assign(old,x)}else state.transactions=state.transactions.filter(t=>t.id!==x.id);alert("Trade not saved:\n\n"+e.message)}}
+function editTrade(id){let x=state.transactions.find(t=>t.id===id);if(!x)return;editingId=id;$("tradeForm").classList.remove("hidden");$("type").value=x.type;$("etf").value=x.etf;$("price").value=x.price;$("qty").value=x.qty;$("actualFees").value=x.actualFees??"";$("note").value=x.note||"";$("formTitle").textContent="Edit "+(x.type==="BUY"?"Buy":"Sell")+" Transaction";$("saveButton").textContent="Update Trade";refreshPreview();$("tradeForm").scrollIntoView({behavior:"smooth"})}
+function deleteTrade(id){let old=state.transactions;state.transactions=old.filter(x=>x.id!==id);try{rebuild();save();render()}catch(e){state.transactions=old;alert("Cannot delete this transaction because it would make a later sale invalid.")}}
+function renderRecent(){let b;try{b=rebuild()}catch(e){b={saleInfo:{}}};let a=[...state.transactions].sort((x,y)=>new Date(y.time)-new Date(x.time));$("recent").innerHTML=a.length?a.slice(0,15).map(x=>{let f=fee(x.price*x.qty,x.actualFees),pl=x.type==="SELL"?b.saleInfo[x.id]:null;return `<div class="item"><div class="top"><div><b><span class="pill ${x.type==="BUY"?"buy":"sell"}">${x.type}</span> ${x.etf}</b><div class="meta">${dt(x.time)}</div></div><b>${money(x.price)}</b></div><div class="minis"><div class="mini"><small>Quantity</small><b>${x.qty}</b></div><div class="mini"><small>${x.type==="BUY"?"Total cost":"Net proceeds"}</small><b>${money(x.type==="BUY"?x.price*x.qty+f.total:x.price*x.qty-f.total)}</b></div>${pl!==null?`<div class="mini"><small>Realised P/L</small><b class="${pl>=0?"positive":"negative"}">${money(pl)}</b></div>`:""}</div>${x.note?`<div class="meta">📝 ${esc(x.note)}</div>`:""}<div class="actions"><button class="btn outline smallbtn" onclick="editTrade('${x.id}')">Edit</button><button class="btn outline smallbtn" onclick="deleteTrade('${x.id}')">Delete</button></div></div>`}).join(""):'<div class="empty">No transactions yet.</div>'}
+function renderLots(){let b=rebuild(),o=b.lots.filter(l=>l.remaining>0).sort((a,z)=>new Date(z.tx.time)-new Date(a.tx.time));$("openLots").innerHTML=o.length?'<div class="list">'+o.map(l=>`<div class="item"><div class="top"><div><b>${l.etf} <span class="pill">OPEN</span></b><div class="meta">Bought ${dt(l.tx.time)}</div></div><b>${l.remaining} shares</b></div><div class="minis"><div class="mini"><small>Buy price</small><b>${money(l.tx.price)}</b></div><div class="mini"><small>Remaining</small><b>${l.remaining}</b></div><div class="mini"><small>Cost basis</small><b>${money(l.remaining*l.tx.price+l.buyFees)}</b></div></div></div>`).join("")+'</div>':'<div class="empty">No open lots.</div>';
+ let m=[...b.matches].reverse();$("completedLots").innerHTML=m.length?`<div class="scroll"><table><tr><th>Sell</th><th>ETF</th><th>Buy date</th><th>Qty</th><th>Buy</th><th>Sell</th><th>Net P/L</th></tr>${m.map(x=>`<tr><td>${dt(x.sellDate)}</td><td>${x.etf}</td><td>${dt(x.buyDate)}</td><td>${x.qty}</td><td>${money(x.buyPrice)}</td><td>${money(x.sellPrice)}</td><td class="${x.pl>=0?"positive":"negative"}"><b>${money(x.pl)}</b></td></tr>`).join("")}</table></div>`:'<div class="empty">No completed lots yet.</div>'}
+function etfStats(etf){let b=rebuild(),m=b.matches.filter(x=>x.etf===etf),o=b.lots.filter(x=>x.etf===etf&&x.remaining>0),pl=round(m.reduce((s,x)=>s+x.pl,0)),w=m.filter(x=>x.pl>0).length;return{m,pl,w,rate:m.length?w/m.length*100:0,avg:m.length?pl/m.length:0,cost:round(m.reduce((s,x)=>s+x.buyFees+x.sellFees,0)),open:o.reduce((s,x)=>s+x.remaining,0),openCost:round(o.reduce((s,x)=>s+x.remaining*x.tx.price+x.buyFees,0))}}
+function monthly(etf){let z={};rebuild().matches.filter(x=>x.etf===etf).forEach(x=>{let k=new Date(x.sellDate).toLocaleDateString("en-SG",{month:"short",year:"numeric"});z[k]=(z[k]||0)+x.pl});return Object.entries(z).map(([month,pl])=>({month,pl:round(pl)}))}
+function chart(el,data){if(!data.length){$(el).innerHTML='<div class="empty">No completed lots yet. The chart will appear after a completed sale.</div>';return}let max=Math.max(...data.map(x=>Math.abs(x.pl)),1);$(el).innerHTML='<div style="height:210px;display:flex;align-items:flex-end;gap:7px;border-bottom:1px solid #bbc6d4;padding:8px 4px 0">'+data.map(x=>`<div style="flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;position:relative"><div style="width:min(34px,70%);height:${Math.max(4,Math.abs(x.pl)/max*82)}%;background:${x.pl<0?"#d93636":"#1769e0"};border-radius:6px 6px 1px 1px;position:relative"><span style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;white-space:nowrap">${money(x.pl)}</span></div><span style="position:absolute;top:100%;font-size:8px;color:#687386;white-space:nowrap">${x.month}</span></div>`).join("")+'</div>'}
+function renderReview(){let e=etfStats("ES3"),g=etfStats("G3B"),m=[...e.m,...g.m],pl=round(m.reduce((s,x)=>s+x.pl,0));$("stats").innerHTML=[["Completed lots",m.length,""],["Winning lots",m.filter(x=>x.pl>0).length,"positive"],["Losing lots",m.filter(x=>x.pl<0).length,"negative"],["Realised P/L",money(pl),pl>=0?"positive":"negative"]].map(x=>`<div class="stat"><small>${x[0]}</small><strong class="${x[2]}">${x[1]}</strong></div>`).join("");
+ $("summary").innerHTML=["ES3","G3B"].map(t=>{let s=etfStats(t);return `<div class="item" style="margin-bottom:8px"><div class="top"><b>${t}</b><b class="${s.pl>=0?"positive":"negative"}">${money(s.pl)}</b></div><div class="minis"><div class="mini"><small>Completed</small><b>${s.m.length}</b></div><div class="mini"><small>Win rate</small><b>${s.rate.toFixed(0)}%</b></div><div class="mini"><small>Average P/L</small><b>${money(s.avg)}</b></div><div class="mini"><small>Total costs</small><b>${money(s.cost)}</b></div><div class="mini"><small>Open shares</small><b>${s.open}</b></div><div class="mini"><small>Open cost</small><b>${money(s.openCost)}</b></div></div></div>`}).join("");
+ chart("es3Chart",monthly("ES3"));chart("g3bChart",monthly("G3B"));
+ let ms=[...rebuild().matches].reverse();$("completedTable").innerHTML=ms.length?`<div class="scroll"><table><tr><th>Sell</th><th>ETF</th><th>Buy</th><th>Qty</th><th>Buy</th><th>Sell</th><th>Buy costs</th><th>Sell costs</th><th>Net P/L</th></tr>${ms.map(x=>`<tr><td>${dt(x.sellDate)}</td><td>${x.etf}</td><td>${dt(x.buyDate)}</td><td>${x.qty}</td><td>${money(x.buyPrice)}</td><td>${money(x.sellPrice)}</td><td>${money(x.buyFees)}</td><td>${money(x.sellFees)}</td><td class="${x.pl>=0?"positive":"negative"}"><b>${money(x.pl)}</b></td></tr>`).join("")}</table></div>`:'<div class="empty">No completed trades yet.</div>'}
+}
+function loadSettings(){let s=state.settings;$("setTitle").value=s.title;$("setIcon").value=s.icon;$("setPrimary").value=s.primary;$("setBg").value=s.bg;$("setVersion").value=s.version;$("brokerPct").value=s.brokerPct;$("brokerMin").value=s.brokerMin;$("clearingPct").value=s.clearingPct;$("tradingPct").value=s.tradingPct;$("gstPct").value=s.gstPct;$("otherFee").value=s.otherFee;$("gstOn").checked=s.gstOn;$("passwordEnabled").checked=s.passwordEnabled;$("passwordBox").classList.toggle("hidden",!s.passwordEnabled)}
+function saveAppSettings(){Object.assign(state.settings,{title:$("setTitle").value||"ETF Trade Tracker",icon:$("setIcon").value||"📈",primary:$("setPrimary").value,bg:$("setBg").value,version:$("setVersion").value||"1.0"});save();applyTheme();alert("App settings saved.")}
+function saveCostSettings(){Object.assign(state.settings,{brokerPct:n($("brokerPct").value),brokerMin:n($("brokerMin").value),clearingPct:n($("clearingPct").value),tradingPct:n($("tradingPct").value),gstPct:n($("gstPct").value),otherFee:n($("otherFee").value),gstOn:$("gstOn").checked});save();render();alert("Cost settings saved.")}
+function passwordToggle(){if($("passwordEnabled").checked){$("passwordBox").classList.remove("hidden")}else{if(confirm("Disable password protection?")){state.settings.passwordEnabled=false;state.settings.passwordHash="";save();$("passwordBox").classList.add("hidden")}else $("passwordEnabled").checked=true}}
+async function setPassword(){let a=$("newPassword").value,b=$("confirmPassword").value;if(a.length<4)return alert("Use at least 4 characters.");if(a!==b)return alert("Passwords do not match.");state.settings.passwordHash=await sha(a);state.settings.passwordEnabled=true;save();sessionStorage.setItem("unlocked","1");$("newPassword").value=$("confirmPassword").value="";alert("Password protection enabled.")}
+function lockApp(){if(state.settings.passwordEnabled){sessionStorage.removeItem("unlocked");$("app").classList.add("hidden");$("login").classList.remove("hidden");$("loginPassword").value="";$("loginError").textContent=""}}
+async function unlock(){let h=await sha($("loginPassword").value);if(h===state.settings.passwordHash){sessionStorage.setItem("unlocked","1");$("login").classList.add("hidden");$("app").classList.remove("hidden");render()}else $("loginError").textContent="Incorrect password."}
+$("loginPassword").addEventListener("keydown",e=>{if(e.key==="Enter")unlock()});
+function exportBackup(){let data={app:"ETF Trade Tracker",version:1,exported:new Date().toISOString(),data:{...state,settings:{...state.settings,passwordEnabled:false,passwordHash:""}}};let a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.download="ETF-Trade-Tracker-backup-"+new Date().toISOString().slice(0,10)+".json";a.click()}
+function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result).data;if(!d||!Array.isArray(d.transactions))throw 0;if(confirm("Replace current records with this backup?")){state=d;state.settings={...DEFAULT.settings,...state.settings,passwordEnabled:false,passwordHash:""};save();render();alert("Backup restored.")}}catch{alert("Invalid backup file.")}};r.readAsText(f);e.target.value=""}
+function clearAll(){if(confirm("Delete ALL trade records? This cannot be undone without a backup.")){state.transactions=[];save();render()}}
+function render(){renderRecent();renderLots();renderReview();loadSettings();applyTheme();refreshPreview()}
+function init(){load();applyTheme();if(state.settings.passwordEnabled&&sessionStorage.getItem("unlocked")!=="1")$("login").classList.remove("hidden");else{$("app").classList.remove("hidden");render()}}
+init();
+</script>
+</body>
+</html>
